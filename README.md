@@ -27,7 +27,7 @@ Eklentiyi Adobe Premiere Pro'nun CEP extensions klasörüne kopyalamanız gerekm
 
 **Windows:**
 ```
-C:\Users\[KullanıcıAdınız]\AppData\Roaming\Adobe\CEP\extensions\
+C:\Program Files (x86)\Common Files\Adobe\CEP\extensions
 ```
 
 **macOS:**

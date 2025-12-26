@@ -1,2 +1,188 @@
-# GeminiOtomatikTurkceAltyazi
-Gemini aracılığıyla Premiere Pro içerisinde otomatik Türkçe altyazı oluşturma aracı.
+# Antigravity Subs Generator
+
+Adobe Premiere Pro için geliştirilmiş, Google Gemini AI kullanan otomatik altyazı oluşturma eklentisi.
+
+## 🎯 Özellikler
+
+- **AI Destekli Altyazı Oluşturma**: Google Gemini API'sini kullanarak videolarınızdan otomatik altyazı üretir
+- **Çoklu Gemini Model Desteği**: Gemini Flash, Gemini Pro gibi farklı modeller arasından seçim yapabilme
+- **Esnek Ses İşleme**: Birden fazla ses kanalını seçerek işleme alabilme
+- **Work Area Desteği**: Sadece belirlediğiniz zaman aralığı için altyazı oluşturma
+- **Token Tasarrufu**: Ses hızlandırma ile Gemini API maliyetlerini düşürme (opsiyonel)
+- **Boşluk Doldurma**: Sessiz kısımlarda altyazının ekranda kalmasını sağlama
+- **SRT Export**: Oluşturulan altyazıları SRT formatında dışa aktarma
+- **AI İçerik Asistanı**: Altyazıları kullanarak sosyal medya için otomatik içerik oluşturma
+
+## 📋 Gereksinimler
+
+- **Adobe Premiere Pro**: Versiyon 14.0 veya üzeri (CC 2020+)
+- **Google Gemini API Key**: [Google AI Studio](https://aistudio.google.com/app/apikey) üzerinden ücretsiz alabilirsiniz
+- **İşletim Sistemi**: Windows veya macOS
+
+## 🚀 Kurulum
+
+### 1. Eklenti Dosyalarını Kopyalama
+
+Eklentiyi Adobe Premiere Pro'nun CEP extensions klasörüne kopyalamanız gerekmektedir:
+
+**Windows:**
+```
+C:\Users\[KullanıcıAdınız]\AppData\Roaming\Adobe\CEP\extensions\
+```
+
+**macOS:**
+```
+~/Library/Application Support/Adobe/CEP/extensions/
+```
+
+#### Adımlar:
+
+1. `subs_generator` klasörünün tamamını yukarıdaki extensions klasörüne kopyalayın
+2. Son dizin yapısı şu şekilde olmalı:
+   ```
+   extensions/
+   └── subs_generator/
+       ├── CSXS/
+       │   └── manifest.xml
+       ├── client/
+       │   ├── index.html
+       │   ├── main.js
+       │   ├── style.css
+       │   └── CSInterface.js
+       ├── host/
+       │   └── index.jsx
+       └── package.json
+   ```
+
+### 2. Debug Mode Etkinleştirme (İlk Kullanım için Önemli)
+
+Adobe, imzasız eklentilerin çalışabilmesi için debug modunun etkinleştirilmesini gerektirir.
+
+**Windows:**
+
+1. Windows tuşu + R'ye basın
+2. `regedit` yazıp Enter'a basın
+3. Şu yola gidin:
+   ```
+   HKEY_CURRENT_USER\Software\Adobe\CSXS.9
+   ```
+   > Not: Premiere Pro sürümünüze göre `CSXS.9`, `CSXS.10` veya `CSXS.11` olabilir
+
+4. Sağ tıklayın → Yeni → String Value
+5. İsim olarak `PlayerDebugMode` yazın
+6. Değer olarak `1` girin
+
+**macOS:**
+
+Terminal'i açın ve şu komutu çalıştırın:
+
+```bash
+defaults write com.adobe.CSXS.9 PlayerDebugMode 1
+```
+
+> Not: Premiere Pro sürümünüze göre `CSXS.9` yerine `CSXS.10` veya `CSXS.11` kullanabilirsiniz
+
+### 3. Premiere Pro'yu Yeniden Başlatma
+
+Debug mode ayarlarını yaptıktan sonra Adobe Premiere Pro'yu tamamen kapatıp tekrar açın.
+
+### 4. Eklentiyi Açma
+
+1. Premiere Pro'yu açın
+2. Menüden: **Window** → **Extensions** → **Antigravity Subs Generator**
+3. Panel açılmalı ve kullanıma hazır olmalıdır
+
+## ⚙️ Kullanım
+
+### İlk Kurulum
+
+1. **API Key Girişi**: 
+   - Gemini API Key alanına [Google AI Studio](https://aistudio.google.com/app/apikey)'dan aldığınız API anahtarınızı girin
+   
+2. **Model Seçimi**:
+   - "Fetch Models" düğmesine tıklayarak kullanılabilir modelleri getirin
+   - Açılan listeden kullanmak istediğiniz modeli seçin (Önerilen: Gemini Flash 2.5)
+
+### Altyazı Oluşturma
+
+1. Premiere Pro'da bir sequence açın
+2. Eklenti panelinde ayarlarınızı yapın:
+   - **Max Words Per Line**: Satır başına maksimum kelime sayısı (varsayılan: 5)
+   - **Active Audio Tracks**: Hangi ses kanallarının işleneceğini seçin
+   - **Work Area Only**: Sadece belirlediğiniz alan için işlem yapmak isterseniz işaretleyin
+   - **Fill Gaps**: Sessiz kısımlarda altyazının ekranda kalmasını isterseniz işaretleyin
+   - **Token Saver**: API kullanımını azaltmak için ses hızlandırma isterseniz seçin
+
+3. **"Generate Subtitles"** düğmesine tıklayın
+4. İşlem tamamlandığında altyazılar otomatik olarak Premiere Pro projenize aktarılacaktır
+
+### SRT Dışa Aktarma
+
+1. Altyazılar oluşturulduktan sonra **"Export SRT"** düğmesi aktif olacaktır
+2. Düğmeye tıklayın
+3. SRT dosyası otomatik olarak proje klasörünüze kaydedilecektir
+
+### AI İçerik Asistanı
+
+1. Altyazılar oluşturulduktan sonra **🪄** (sihirli değnek) düğmesine tıklayın
+2. Açılan pencerede:
+   - **Video Context**: Video hakkında bilgi girin (kim, konu, platform)
+   - **Your Request**: Ne tür içerik istediğinizi yazın (örn: "başlık, açıklama ve hashtag oluştur")
+3. **"Generate Content"** düğmesine tıklayın
+4. Oluşturulan içeriği kopyalayabilir ve sosyal medyada kullanabilirsiniz
+
+## 🔧 Ayarlar
+
+### Token Saver (Ses Hızlandırma)
+
+Gemini API token kullanımını azaltmak için ses dosyasını hızlandırır:
+
+- **1.0x (Off)**: Normal hız, hiç hızlandırma yok
+- **1.5x (Safe)**: %33 token tasarrufu, önerilen
+- **1.75x (Testing)**: Test amaçlı
+- **2.0x (Aggressive)**: %50 token tasarrufu, agresif
+
+> ⚠️ Not: Zaman damgaları otomatik olarak düzeltilir, çıktı doğru zamanlarda olur
+
+### Ses Kanalları
+
+A1, A2, A3, A4 kanallarından hangilerinin işleneceğini seçebilirsiniz. İşaretli olmayan kanallar sessiz alınır.
+
+## ❓ Sorun Giderme
+
+### Eklenti Görünmüyor
+
+1. Debug mode ayarının doğru yapıldığından emin olun
+2. Dosyaların doğru konuma kopyalandığını kontrol edin
+3. Premiere Pro'yu tamamen kapatıp yeniden açın
+4. CSXS sürüm numarasını kontrol edin (9, 10 veya 11)
+
+### API Hatası
+
+- API Key'in doğru girildiğinden emin olun
+- İnternet bağlantınızı kontrol edin
+- Google AI Studio'da API limitlerini kontrol edin
+
+### Ses Dosyası Oluşturulamıyor
+
+- Aktif bir sequence'ın açık olduğundan emin olun
+- Ses kanallarının dolu olduğunu kontrol edin
+- Premiere Pro projesinin kaydedilmiş olduğundan emin olun
+
+### Altyazı İçe Aktarılamıyor
+
+- SRT dosyasının oluşturulduğunu kontrol edin
+- Premiere Pro projesinin kaydedilmiş olduğundan emin olun
+- Dosya yolunda Türkçe karakter olup olmadığını kontrol edin
+
+## 📝 Lisans
+
+MIT License
+
+## 🤝 Destek
+
+Sorularınız veya önerileriniz için iletişime geçebilirsiniz.
+
+---
+
+**Antigravity Subs Generator** - Dedeoğlu Medya - Adnan Dedeoğlu için geliştirilmiştir ❤️

@@ -1,0 +1,12 @@
+{
+    "name": "antigravity-subs-generator",
+    "version": "1.0.0",
+    "description": "Premiere Pro panel for generating subtitles using Gemini API",
+    "main": "client/index.html",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {},
+    "author": "Antigravity",
+    "license": "ISC"
+}

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Subs Generator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h2>Subs Generator</h2>
+        </header>
+
+        <div class="section settings">
+            <label for="apiKey">Gemini API Key</label>
+            <div style="display: flex; gap: 5px;">
+                <input type="password" id="apiKey" placeholder="AIwaSy..." style="flex: 1;" />
+                <button id="btnCheckModels" class="secondary-btn"
+                    style="width: auto; padding: 0 10px; font-size: 11px;">Fetch Models</button>
+            </div>
+
+            <label for="maxWords">Max Words Per Line</label>
+            <input type="number" id="maxWords" value="5" min="1" max="20" />
+
+            <label for="modelId">Gemini Model ID</label>
+            <select id="modelId" disabled
+                style="width: 100%; padding: 6px; background: #333; color: white; border: 1px solid #444;">
+                <option value="">Fetch models first...</option>
+            </select>
+
+
+            <label for="speedSaver">Token Saver (Audio Speed)</label>
+            <select id="speedSaver"
+                style="width: 100%; padding: 6px; background: #333; color: white; border: 1px solid #444;">
+                <option value="1.0">Off (Standard)</option>
+                <option value="1.5">1.5x (Safe - Save 33%)</option>
+                <option value="1.75">1.75x (Testing)</option>
+                <option value="2.0">2.0x (Aggressive - Save 50%)</option>
+            </select>
+            <div style="font-size: 10px; color: #888; margin-bottom: 10px;">
+                * Speeds up audio to save Gemini tokens. Timestamps are auto-fixed.
+            </div>
+
+            <label>Active Audio Tracks</label>
+            <div class="track-selector" style="display: flex; gap: 10px; margin-top:5px;">
+                <label><input type="checkbox" class="track-cb" value="0" checked> A1</label>
+                <label><input type="checkbox" class="track-cb" value="1"> A2</label>
+                <label><input type="checkbox" class="track-cb" value="2"> A3</label>
+                <label><input type="checkbox" class="track-cb" value="3"> A4</label>
+            </div>
+
+            <div style="margin-top: 10px;">
+                <label style="display: flex; align-items: center; cursor: pointer;">
+                    <input type="checkbox" id="workAreaOnly" style="width: auto; margin-right: 8px;">
+                    <span>Work Area Only (Faster)</span>
+                </label>
+            </div>
+
+            <div style="margin-top: 15px; border-top: 1px solid #444; padding-top: 10px;">
+                <label style="display: flex; align-items: center; cursor: pointer;">
+                    <input type="checkbox" id="fillGaps" style="width: auto; margin-right: 8px;">
+                    <span>Fill Gaps (Close silences)</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="section actions">
+        <button id="btnGenerate" class="primary-btn">Generate Subtitles</button>
+        <div style="display: flex; gap: 5px;">
+            <button id="btnExportSrt" class="secondary-btn" disabled style="flex: 1;">Export SRT</button>
+            <button id="btnAiMagic" class="secondary-btn" title="AI Content Assistant" style="width: 40px;">🪄</button>
+        </div>
+        <div id="status" class="status-log">Ready</div>
+    </div>
+
+    <!-- AI Magic Modal -->
+    <div id="aiModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>AI Content Assistant 🪄</h3>
+                <span id="closeModal" class="close-btn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 11px; margin-bottom: 10px; color: #aaa;">
+                    Use the generated subtitles as context to create social media content.
+                </p>
+
+                <label for="aiContext">Video Context (Who, Topic, Platform)</label>
+                <textarea id="aiContext" rows="2"
+                    placeholder="e.g. Dedeoğlu Media, Tech Review, Instagram Reels"></textarea>
+
+                <label for="aiPrompt" style="margin-top: 10px;">Your Request</label>
+                <textarea id="aiPrompt" rows="3"
+                    placeholder="e.g. Write a catchy title, short description, and 5 hashtags."></textarea>
+
+                <button id="btnAiGenerate" class="primary-btn" style="margin-top: 15px; width: 100%;">Generate
+                    Content</button>
+
+                <div id="aiResultContainer" style="display: none; margin-top: 15px;">
+                    <label>Result:</label>
+                    <textarea id="aiResult" rows="6" readonly></textarea>
+                </div>
+                <button id="btnCopyResult" class="secondary-btn"
+                    style="margin-top:10px; width: 100%; display: none;">Copy to Clipboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- We need CSInterface.js. For now assuming it is present or we will add it -->
+    <script src="CSInterface.js"></script>
+    <script src="main.js"></script>
+</body>
+
+</html>

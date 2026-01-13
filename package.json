@@ -4,9 +4,12 @@
     "description": "Premiere Pro panel for generating subtitles using Gemini API",
     "main": "client/index.html",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build:zxp": "node build-zxp.js"
     },
-    "dependencies": {},
     "author": "Antigravity",
-    "license": "ISC"
+    "license": "ISC",
+    "devDependencies": {
+        "archiver": "^7.0.1"
+    }
 }

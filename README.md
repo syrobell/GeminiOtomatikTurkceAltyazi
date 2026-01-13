@@ -21,9 +21,37 @@ Adobe Premiere Pro için geliştirilmiş, Google Gemini AI kullanan otomatik alt
 
 ## 🚀 Kurulum
 
-### 1. Eklenti Dosyalarını Kopyalama
+### Kolay Kurulum (Önerilen) 🎯
 
-Eklentiyi Adobe Premiere Pro'nun CEP extensions klasörüne kopyalamanız gerekmektedir:
+**ZXP kurulum paketi kullanarak** tek tıkla kurulum yapabilirsiniz!
+
+#### 1. ZXP Installer İndirin
+
+[ZXP Installer'ı buradan ücretsiz indirin](https://aescripts.com/learn/zxp-installer/)
+
+#### 2. Extension'ı Yükleyin
+
+1. `dist/Antigravity-Subs-Generator-v1.0.0.zxp` dosyasını **ZXP Installer** penceresine sürükleyip bırakın
+2. Kurulum otomatik olarak tamamlanacaktır
+
+#### 3. Premiere Pro'da Açın
+
+1. Adobe Premiere Pro'yu açın (zaten açıksa yeniden başlatın)
+2. Menüden: **Window** → **Extensions** → **Antigravity Subs Generator**
+3. Panel açılmalı ve kullanıma hazır olmalıdır
+
+> ✅ **Avantaj**: Developer mode'a gerek yok - hemen kullanmaya başlayabilirsiniz!
+
+Detaylı kurulum kılavuzu için: [INSTALLATION_GUIDE.md](INSTALLATION_GUIDE.md)
+
+### Manuel Kurulum (Geliştiriciler İçin)
+
+<details>
+<summary>Geliştirme yapmak veya kaynak koddan kurmak için tıklayın</summary>
+
+#### 1. Eklenti Dosyalarını Kopyalama
+
+Eklentiyi Adobe Premiere Pro'nun CEP extensions klasörüne kopyalayın:
 
 **Windows:**
 ```
@@ -35,58 +63,19 @@ C:\Program Files (x86)\Common Files\Adobe\CEP\extensions
 ~/Library/Application Support/Adobe/CEP/extensions/
 ```
 
-#### Adımlar:
-
-1. `subs_generator` klasörünün tamamını yukarıdaki extensions klasörüne kopyalayın
-2. Son dizin yapısı şu şekilde olmalı:
-   ```
-   extensions/
-   └── subs_generator/
-       ├── CSXS/
-       │   └── manifest.xml
-       ├── client/
-       │   ├── index.html
-       │   ├── main.js
-       │   ├── style.css
-       │   └── CSInterface.js
-       ├── host/
-       │   └── index.jsx
-       └── package.json
-   ```
-
-### 2. Debug Mode Etkinleştirme (İlk Kullanım için Önemli)
-
-Adobe, imzasız eklentilerin çalışabilmesi için debug modunun etkinleştirilmesini gerektirir.
+#### 2. Debug Mode Etkinleştirme
 
 **Windows:**
-
-1. Windows tuşu + R'ye basın
-2. `regedit` yazıp Enter'a basın
-3. Şu yola gidin:
-   ```
-   HKEY_CURRENT_USER\Software\Adobe\CSXS.9
-   ```
-   > Not: Premiere Pro sürümünüze göre `CSXS.9`, `CSXS.10` veya `CSXS.11` olabilir
-
-4. Sağ tıklayın → Yeni → String Value
-5. İsim olarak `PlayerDebugMode` yazın
-6. Değer olarak `1` girin
+1. Windows tuşu + R → `regedit`
+2. `HKEY_CURRENT_USER\Software\Adobe\CSXS.9` yoluna gidin (Premiere sürümünüze göre CSXS.9, 10 veya 11)
+3. Yeni → String Value → `PlayerDebugMode` = `1`
 
 **macOS:**
-
-Terminal'i açın ve şu komutu çalıştırın:
-
 ```bash
 defaults write com.adobe.CSXS.9 PlayerDebugMode 1
 ```
 
-> Not: Premiere Pro sürümünüze göre `CSXS.9` yerine `CSXS.10` veya `CSXS.11` kullanabilirsiniz
-
-### 3. Premiere Pro'yu Yeniden Başlatma
-
-Debug mode ayarlarını yaptıktan sonra Adobe Premiere Pro'yu tamamen kapatıp tekrar açın.
-
-### 4. Eklentiyi Açma
+#### 3. Eklentiyi Açma
 
 1. Premiere Pro'yu açın
 2. Menüden: **Window** → **Extensions** → **Antigravity Subs Generator**
@@ -174,6 +163,21 @@ A1, A2, A3, A4 kanallarından hangilerinin işleneceğini seçebilirsiniz. İşa
 - SRT dosyasının oluşturulduğunu kontrol edin
 - Premiere Pro projesinin kaydedilmiş olduğundan emin olun
 - Dosya yolunda Türkçe karakter olup olmadığını kontrol edin
+
+</details>
+
+## 🛠️ Geliştirme
+
+### ZXP Paketi Oluşturma
+
+Yeni bir kurulum paketi oluşturmak için:
+
+```bash
+npm install
+npm run build:zxp
+```
+
+Paket `dist/` klasöründe oluşturulacaktır.
 
 ## 📝 Lisans
 

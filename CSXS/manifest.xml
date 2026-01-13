@@ -4,6 +4,12 @@
     <ExtensionList>
         <Extension Id="com.antigravity.subs.generator" Version="1.0.0" />
     </ExtensionList>
+    <Author>Antigravity - Dedeoğlu Medya</Author>
+    <Contact>mailto:info@dedeoglumedia.com</Contact>
+    <Legal>Copyright 2026 Antigravity. All rights reserved.</Legal>
+    <Abstract href="https://github.com/dedeoglumedia/subs-generator">
+        <![CDATA[AI-powered subtitle generator for Adobe Premiere Pro using Google Gemini API. Automatically creates subtitles from video audio tracks with support for multiple languages and advanced features.]]>
+    </Abstract>
     <ExecutionEnvironment>
         <HostList>
             <Host Name="PPRO" Version="[14.0,99.9]" />

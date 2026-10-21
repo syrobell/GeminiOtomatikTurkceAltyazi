@@ -80,8 +80,12 @@ function exportCurrentSequenceAudio(outputPath, trackIndicesStr, useWorkArea) {
         // 5. Restore States
         if (targetTracks !== null) restoreMuteStates(seq, originalStates);
 
-        // Return Result
-        return result ? "true" : "error:ExportFailed";
+        // Return Result (check file existence as well since exportAsMediaDirect can return 0/"No Error")
+        var exportedFile = new File(outputPath);
+        if (exportedFile.exists || result === true || result === "No Error" || result === 0) {
+            return "true";
+        }
+        return "error:ExportFailed";
 
     } catch (e) {
         return "error:" + e.toString();
@@ -126,27 +130,93 @@ function safeSetMute(track, muteState) {
     } catch (e) { }
 }
 
+function addPresetRootIfExists(presetRoots, pathStr) {
+    if (!pathStr) return;
+    var f = new Folder(pathStr);
+    if (f.exists) {
+        for (var i = 0; i < presetRoots.length; i++) {
+            if (presetRoots[i].fsName === f.fsName) return;
+        }
+        presetRoots.push(f);
+    }
+}
+
+function scanAppBundlesForPresets(folder, presetRoots) {
+    if (!folder || !folder.exists) return;
+    var items = folder.getFiles();
+    if (!items) return;
+    for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        var decodedName = File.decode(item.name);
+        if (decodedName.indexOf(".app") !== -1) {
+            addPresetRootIfExists(presetRoots, item.fsName + "/Contents/MediaIO/systempresets");
+        }
+    }
+}
+
 function findBestAudioPreset() {
     var appPath = new File(app.path);
     var presetRoots = [];
+    var decodedAppName = File.decode(appPath.name);
 
-    // System Preset paths
+    // Windows & macOS direct paths relative to app.path
     var pathsToCheck = [
         appPath.fsName + "/MediaIO/systempresets",
-        appPath.parent.fsName + "/MediaIO/systempresets",
-        appPath.parent.fsName + "/Adobe Media Encoder/Presets"
+        appPath.fsName + "/Contents/MediaIO/systempresets",
+        appPath.fsName + "/" + decodedAppName + ".app/Contents/MediaIO/systempresets"
     ];
 
+    if (appPath.parent) {
+        pathsToCheck.push(appPath.parent.fsName + "/MediaIO/systempresets");
+        pathsToCheck.push(appPath.parent.fsName + "/Contents/MediaIO/systempresets");
+        pathsToCheck.push(appPath.parent.fsName + "/Adobe Media Encoder/Presets");
+        if (appPath.parent.parent) {
+            pathsToCheck.push(appPath.parent.parent.fsName + "/MediaIO/systempresets");
+            pathsToCheck.push(appPath.parent.parent.fsName + "/Contents/MediaIO/systempresets");
+        }
+    }
+
     for (var i = 0; i < pathsToCheck.length; i++) {
-        var f = new Folder(pathsToCheck[i]);
-        if (f.exists) presetRoots.push(f);
+        addPresetRootIfExists(presetRoots, pathsToCheck[i]);
+    }
+
+    // macOS: Scan inside appPath and /Applications for Adobe Premiere Pro / Media Encoder .app bundles
+    scanAppBundlesForPresets(new Folder(appPath.fsName), presetRoots);
+    if (appPath.parent) {
+        scanAppBundlesForPresets(appPath.parent, presetRoots);
+    }
+
+    var macAppsFolder = new Folder("/Applications");
+    if (macAppsFolder.exists) {
+        var appDirs = macAppsFolder.getFiles();
+        if (appDirs) {
+            for (var d = 0; d < appDirs.length; d++) {
+                var dirName = File.decode(appDirs[d].name).toLowerCase();
+                if (dirName.indexOf("adobe premiere pro") !== -1 || dirName.indexOf("adobe media encoder") !== -1) {
+                    if (dirName.indexOf(".app") !== -1) {
+                        addPresetRootIfExists(presetRoots, appDirs[d].fsName + "/Contents/MediaIO/systempresets");
+                    } else if (appDirs[d] instanceof Folder) {
+                        scanAppBundlesForPresets(appDirs[d], presetRoots);
+                    }
+                }
+            }
+        }
     }
 
     if (presetRoots.length === 0) return null;
 
-    // Strict Audio Priorities. 
-    // User requested "MP3 192 kbps High Quality" specifically.
-    var priorities = ["MP3 192 kbps High Quality", "MP3", "AAC", "WAV"];
+    // Strict Audio Priorities (handles both "192kbps" on macOS/newer versions and "192 kbps")
+    var priorities = [
+        "MP3 192kbps High Quality",
+        "MP3 192 kbps High Quality",
+        "MP3 256kbps High Quality",
+        "MP3 128kbps",
+        "MP3",
+        "Stereo AAC",
+        "AAC",
+        "Waveform Audio",
+        "WAV"
+    ];
 
     for (var r = 0; r < presetRoots.length; r++) {
         var root = presetRoots[r];
@@ -172,15 +242,17 @@ function recursiveSearch(folder, term, depth) {
     var files = folder.getFiles();
     if (!files) return null;
 
+    var searchLower = term.toLowerCase();
+
     // First pass: Files
     for (var i = 0; i < files.length; i++) {
         var f = files[i];
         if (f instanceof File) {
-            var name = f.name.toLowerCase();
-            if (name.indexOf(".epr") !== -1) {
-                // If term is just .epr, matches everything.
-                // Else check specific term (e.g. "mp3")
-                if (term === ".epr" || name.indexOf(term.toLowerCase()) !== -1) {
+            // Decode URI-encoded names (e.g. "MP3%20192kbps..." -> "MP3 192kbps...")
+            var decodedName = File.decode(f.name).toLowerCase();
+            var rawName = f.name.toLowerCase();
+            if (decodedName.indexOf(".epr") !== -1 || rawName.indexOf(".epr") !== -1) {
+                if (searchLower === ".epr" || decodedName.indexOf(searchLower) !== -1 || rawName.indexOf(searchLower) !== -1) {
                     return f.fsName;
                 }
             }

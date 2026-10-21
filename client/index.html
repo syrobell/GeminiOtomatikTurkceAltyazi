@@ -25,9 +25,12 @@
             <input type="number" id="maxWords" value="5" min="1" max="20" />
 
             <label for="modelId">Gemini Model ID</label>
-            <select id="modelId" disabled
+            <select id="modelId"
                 style="width: 100%; padding: 6px; background: #333; color: white; border: 1px solid #444;">
-                <option value="">Fetch models first...</option>
+                <option value="gemini-2.5-flash" selected>Gemini 2.5 Flash (gemini-2.5-flash)</option>
+                <option value="gemini-2.0-flash">Gemini 2.0 Flash (gemini-2.0-flash)</option>
+                <option value="gemini-2.5-pro">Gemini 2.5 Pro (gemini-2.5-pro)</option>
+                <option value="gemini-1.5-flash">Gemini 1.5 Flash (gemini-1.5-flash)</option>
             </select>
 
 

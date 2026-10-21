@@ -7,6 +7,15 @@
 
     function init() {
         themeManager.init();
+        setupCustomSelect('modelId');
+        setupCustomSelect('speedSaver');
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.custom-select-wrapper')) {
+                document.querySelectorAll('.custom-select-wrapper.open').forEach(w => w.classList.remove('open'));
+            }
+        });
+
         document.getElementById('btnGenerate').addEventListener('click', startGeneration);
         document.getElementById('btnCheckModels').addEventListener('click', fetchModels);
         document.getElementById('btnExportSrt').addEventListener('click', exportSrt);
@@ -14,6 +23,77 @@
         document.getElementById('closeModal').addEventListener('click', closeAiModal);
         document.getElementById('btnAiGenerate').addEventListener('click', generateAiContent);
         document.getElementById('btnCopyResult').addEventListener('click', copyAiResult);
+    }
+
+    function setupCustomSelect(selectId) {
+        const selectEl = document.getElementById(selectId);
+        if (!selectEl) return;
+
+        // Hide native select (macOS CEP native select popups fail to open)
+        selectEl.style.display = 'none';
+
+        let wrapper = document.getElementById(`custom_wrapper_${selectId}`);
+        if (!wrapper) {
+            wrapper = document.createElement('div');
+            wrapper.id = `custom_wrapper_${selectId}`;
+            wrapper.className = 'custom-select-wrapper';
+
+            const trigger = document.createElement('div');
+            trigger.className = 'custom-select-trigger';
+            trigger.innerHTML = `<span class="custom-select-label"></span><span class="custom-select-arrow">▼</span>`;
+
+            const optionsList = document.createElement('div');
+            optionsList.className = 'custom-select-options';
+
+            wrapper.appendChild(trigger);
+            wrapper.appendChild(optionsList);
+            selectEl.parentNode.insertBefore(wrapper, selectEl.nextSibling);
+
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (selectEl.disabled) return;
+                const isOpen = wrapper.classList.contains('open');
+                document.querySelectorAll('.custom-select-wrapper.open').forEach(w => w.classList.remove('open'));
+                if (!isOpen) {
+                    wrapper.classList.add('open');
+                }
+            });
+        }
+
+        refreshCustomSelect(selectId);
+    }
+
+    function refreshCustomSelect(selectId) {
+        const selectEl = document.getElementById(selectId);
+        const wrapper = document.getElementById(`custom_wrapper_${selectId}`);
+        if (!selectEl || !wrapper) return;
+
+        const labelEl = wrapper.querySelector('.custom-select-label');
+        const optionsList = wrapper.querySelector('.custom-select-options');
+        optionsList.innerHTML = '';
+
+        const options = Array.from(selectEl.options);
+        const selectedOption = options.find(o => o.value === selectEl.value) || options[0];
+        labelEl.textContent = selectedOption ? selectedOption.textContent : 'Model seçin...';
+
+        options.forEach(opt => {
+            const item = document.createElement('div');
+            item.className = 'custom-select-option' + (opt.value === selectEl.value ? ' selected' : '');
+            item.textContent = opt.textContent;
+            item.dataset.value = opt.value;
+
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectEl.value = opt.value;
+                labelEl.textContent = opt.textContent;
+                optionsList.querySelectorAll('.custom-select-option').forEach(el => el.classList.remove('selected'));
+                item.classList.add('selected');
+                wrapper.classList.remove('open');
+                selectEl.dispatchEvent(new Event('change'));
+            });
+
+            optionsList.appendChild(item);
+        });
     }
 
     async function fetchModels() {
@@ -60,17 +140,18 @@
                 modelSelect.appendChild(option);
 
                 // Auto-selection priority:
-                // 1. Gemini 2.0 Flash variants (esp. exp/latest) - "Flash 2.5"
-                // 2. Gemini 1.5 Flash variants (fallback)
-                if (id.includes("gemini-2.0-flash")) {
-                    // Prefer exp or latest versions for 2.0
-                    if (id.includes("exp") || id.includes("latest")) {
+                // 1. Gemini 2.5 Flash
+                // 2. Gemini 2.0 Flash variants
+                // 3. Gemini 1.5 Flash variants (fallback)
+                if (id === "gemini-2.5-flash" || (id.includes("gemini-2.5-flash") && !bestModel.includes("gemini-2.5-flash"))) {
+                    bestModel = id;
+                } else if (id.includes("gemini-2.0-flash") && !bestModel.includes("gemini-2.5-flash")) {
+                    if (id === "gemini-2.0-flash" || id.includes("exp") || id.includes("latest")) {
                         bestModel = id;
                     } else if (!bestModel.includes("gemini-2.0-flash")) {
                         bestModel = id;
                     }
-                } else if (id.includes("gemini-1.5-flash") && !bestModel.includes("gemini-2.0")) {
-                    // Fallback to 1.5 if no 2.0 found yet
+                } else if (id.includes("gemini-1.5-flash") && !bestModel.includes("gemini-2.")) {
                     if (!bestModel || id.includes("002") || id.includes("latest")) {
                         bestModel = id;
                     }
@@ -82,6 +163,7 @@
 
             // Enable the dropdown after successful fetch
             modelSelect.disabled = false;
+            modelSelect.removeAttribute('disabled');
 
             // Auto-select best option
             if (bestModel) {
@@ -89,6 +171,8 @@
             } else if (contentModels.length > 0) {
                 modelSelect.selectedIndex = 0;
             }
+
+            refreshCustomSelect('modelId');
 
         } catch (e) {
             console.error(e);
@@ -411,13 +495,23 @@
         return data.file.uri;
     }
 
+    function getExecOptions() {
+        const extraPaths = ['/opt/homebrew/bin', '/usr/local/bin'];
+        const currentPath = process.env.PATH || '';
+        return {
+            env: Object.assign({}, process.env, {
+                PATH: currentPath ? `${currentPath}:${extraPaths.join(':')}` : extraPaths.join(':')
+            })
+        };
+    }
+
     function optimizeAudio(input, output, speed) {
         return new Promise((resolve, reject) => {
             const cp = require('child_process');
             // ffmpeg -i input -filter:a "atempo=1.5" -vn output
             const cmd = `ffmpeg -y -i "${input}" -filter:a "atempo=${speed}" -vn "${output}"`;
 
-            cp.exec(cmd, (err, stdout, stderr) => {
+            cp.exec(cmd, getExecOptions(), (err, stdout, stderr) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -433,7 +527,7 @@
             const cp = require('child_process');
             const cmd = `ffprobe -v error -show_entries format=duration -of csv=p=0 "${audioPath}"`;
 
-            cp.exec(cmd, (err, stdout, stderr) => {
+            cp.exec(cmd, getExecOptions(), (err, stdout, stderr) => {
                 if (err) {
                     console.warn("ffprobe error, falling back to no duration check:", err);
                     resolve(null); // Return null if ffprobe fails
